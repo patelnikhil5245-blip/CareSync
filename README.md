@@ -1,4 +1,4 @@
-# 🩺 MediBook — Online Doctor Appointment System
+# 🩺 CareSync— Online Doctor Appointment System
 
 A full-stack web application built with **React** (frontend) and **Node.js/Express** (backend).
 
