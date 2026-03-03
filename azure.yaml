@@ -1,0 +1,15 @@
+# Azure Developer CLI configuration
+# Deploy CareSync Doctor Appointment System to Azure App Service
+
+name: CareSync
+metadata:
+  template: azd-init@1.0.0
+
+services:
+  web:
+    project: .
+    language: js
+    host: appservice
+
+infra:
+  provider: bicep
