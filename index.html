@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CareSync — Smart Doctor Appointments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/png" href="logo.png">
+</head>
+<body>
+<!-- ─── TOAST ─── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ─── NAVBAR ─── -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="show('home')">
+      <div class="nav-brand-icon">
+        <img src="logo.png" alt="CareSync Logo" style="width:28px;height:28px;object-fit:contain;">
+      </div>
+      <span class="nav-brand-text">CareSync</span>
+    </div>
+    
+    <div class="nav-links" id="navLinks">
+      <button class="nav-link active" onclick="show('home')" data-page="home">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </button>
+      <button class="nav-link" onclick="show('doctors')" data-page="doctors">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Doctors
+      </button>
+      <button class="nav-link" id="nlAppts" onclick="show('appointments')" data-page="appointments">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Appointments
+      </button>
+    </div>
+    
+    <div class="nav-actions" id="navActions">
+      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">
+        <span class="toggle-icon light">☀️</span>
+        <span class="toggle-icon dark">🌙</span>
+        <span class="toggle-knob"></span>
+      </button>
+      
+      <div id="navGuest" class="nav-guest">
+        <button class="nav-btn-login" onclick="show('login')">Sign In</button>
+        <button class="nav-btn-primary" onclick="show('register')">Get Started</button>
+      </div>
+      
+      <div id="navUser" class="nav-user hidden">
+        <div class="user-dropdown">
+          <button class="user-trigger" onclick="toggleUserMenu()">
+            <div class="user-avatar" id="navUserAvatar">👤</div>
+            <span class="user-name" id="navUserName">User</span>
+            <svg class="user-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="user-menu" id="userMenu">
+            <div class="user-menu-header">
+              <div class="user-avatar-lg" id="navUserAvatarLg">👤</div>
+              <div class="user-info">
+                <div class="user-name-lg" id="navUserNameLg">User</div>
+                <div class="user-role" id="navUserRole">Patient</div>
+              </div>
+            </div>
+            <div class="user-menu-divider"></div>
+            <button class="user-menu-item" onclick="show('profile')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              My Profile
+            </button>
+            <button class="user-menu-item" onclick="show('appointments')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              My Appointments
+            </button>
+            <button class="user-menu-item" onclick="show('doctor-panel')" id="navDoctorPanel">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Doctor Dashboard
+            </button>
+            <div class="user-menu-divider"></div>
+            <button class="user-menu-item logout" onclick="doLogout()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── PAGES ─── -->
+<main style="flex:1">
+
+<!-- ═══ HOME ═══ -->
+<div class="page active" id="page-home">
+  <section class="hero" style="background-image: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 40%, rgba(255,255,255,0.3) 100%), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1920&q=80'); background-size: cover; background-position: center right; background-repeat: no-repeat;">
+    <div class="container">
+      <div class="hero-inner">
+        <div>
+          <div class="hero-badge">Healthcare Simplified</div>
+          <h1 class="hero-title">
+            Book Your Doctor
+            <span class="accent">Appointment</span>
+            Instantly
+          </h1>
+          <p class="hero-sub">No queues. No phone calls. Search doctors, check availability, and confirm your appointment in minutes.</p>
+          <div class="hero-btns">
+            <button class="btn btn-primary btn-lg" onclick="show('register')">Get Started Free</button>
+            <button class="btn btn-ghost btn-lg" onclick="show('doctors')">Browse Doctors →</button>
+          </div>
+          <div class="trust-row">
+            <div class="trust-item"><div class="trust-icon">🔒</div> SSL Secured</div>
+            <div class="trust-item"><div class="trust-icon">✅</div> Verified Doctors</div>
+            <div class="trust-item"><div class="trust-icon">💳</div> Secure Payments</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item"><div class="stat-num">120+</div><div class="stat-lbl">Doctors</div></div>
+      <div class="stat-item"><div class="stat-num">15k+</div><div class="stat-lbl">Patients</div></div>
+      <div class="stat-item"><div class="stat-num">30+</div><div class="stat-lbl">Specializations</div></div>
+      <div class="stat-item"><div class="stat-num">98%</div><div class="stat-lbl">Satisfaction</div></div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Why Choose CareSync?</h2>
+      <p class="section-sub">Everything you need to manage your healthcare in one place</p>
+      <div class="grid-4">
+        <div class="card feat-card"><div class="feat-icon">🔍</div><h3>Smart Search</h3><p>Filter by specialization, rating, and real-time availability.</p></div>
+        <div class="card feat-card"><div class="feat-icon">📅</div><h3>Instant Booking</h3><p>Select a slot and confirm your appointment in under 60 seconds.</p></div>
+        <div class="card feat-card"><div class="feat-icon">⏰</div><h3>Countdown Timer</h3><p>Know exactly how long until your next appointment.</p></div>
+        <div class="card feat-card"><div class="feat-icon">💳</div><h3>Secure Payment</h3><p>Pay via card, EasyPaisa, JazzCash or bank transfer safely.</p></div>
+        <div class="card feat-card"><div class="feat-icon">🌙</div><h3>Dark Mode</h3><p>Comfortable viewing in any lighting condition.</p></div>
+        <div class="card feat-card"><div class="feat-icon">🖨️</div><h3>Print Receipts</h3><p>Download and print appointment confirmation receipts.</p></div>
+        <div class="card feat-card"><div class="feat-icon">⭐</div><h3>Ratings & Reviews</h3><p>Make informed choices with real patient reviews.</p></div>
+        <div class="card feat-card"><div class="feat-icon">🔐</div><h3>JWT Secured</h3><p>bcrypt-encrypted passwords and token-based auth.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">Book your appointment in 3 simple steps</p>
+      <div class="steps-row">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-icon">🔍</div>
+          <h3>Search Doctor</h3>
+          <p>Find specialists by name, specialization, or location</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-icon">📅</div>
+          <h3>Book Slot</h3>
+          <p>Select your preferred date and time slot</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-icon">✅</div>
+          <h3>Confirm</h3>
+          <p>Pay securely and get instant confirmation</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="specialties">
+    <div class="container">
+      <h2 class="section-title">Popular Specialties</h2>
+      <p class="section-sub">Consult top doctors across 30+ specializations</p>
+      <div class="spec-grid">
+        <div class="spec-card" onclick="show('doctors')">
+          <div class="spec-icon">❤️</div>
+          <h4>Cardiologist</h4>
+          <p>Heart & Cardiovascular</p>
+        </div>
+        <div class="spec-card" onclick="show('doctors')">
+          <div class="spec-icon">🧠</div>
+          <h4>Neurologist</h4>
+          <p>Brain & Nervous System</p>
+        </div>
+        <div class="spec-card" onclick="show('doctors')">
+          <div class="spec-icon">👶</div>
+          <h4>Pediatrician</h4>
+          <p>Child Health Care</p>
+        </div>
+        <div class="spec-card" onclick="show('doctors')">
+          <div class="spec-icon">🦴</div>
+          <h4>Orthopedic</h4>
+          <p>Bones & Joints</p>
+        </div>
+        <div class="spec-card" onclick="show('doctors')">
+          <div class="spec-icon">👁️</div>
+          <h4>Ophthalmologist</h4>
+          <p>Eye Care</p>
+        </div>
+        <div class="spec-card" onclick="show('doctors')">
+          <div class="spec-icon">🩺</div>
+          <h4>General Physician</h4>
+          <p>Primary Health Care</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials">
+    <div class="container">
+      <h2 class="section-title">What Patients Say</h2>
+      <p class="section-sub">Trusted by thousands of patients across the country</p>
+      <div class="testi-grid">
+        <div class="testi-card">
+          <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testi-text">"Booked my appointment in just 2 minutes! The doctor was excellent and the whole process was seamless."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">👤</div>
+            <div>
+              <div class="testi-name">Rahul Sharma</div>
+              <div class="testi-role">Patient</div>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testi-text">"The UPI payment option is so convenient. No more waiting in queues at the hospital!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">👤</div>
+            <div>
+              <div class="testi-name">Priya Patel</div>
+              <div class="testi-role">Patient</div>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testi-text">"As a doctor, this platform helps me manage appointments efficiently. Highly recommended!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">👨‍⚕️</div>
+            <div>
+              <div class="testi-name">Dr. Vikram Singh</div>
+              <div class="testi-role">Cardiologist</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pay-methods">
+    <div class="container">
+      <h2 class="section-title">Multiple Payment Options</h2>
+      <p class="section-sub">Pay your consultation fee using your preferred method</p>
+      <div class="pay-row">
+        <div class="pay-badge">💳 Credit / Debit Card</div>
+        <div class="pay-badge">📱 Google Pay</div>
+        <div class="pay-badge">📱 PhonePe</div>
+        <div class="pay-badge">📱 Paytm</div>
+        <div class="pay-badge">🔒 Stripe Protected</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-box">
+        <h2>Ready to Get Started?</h2>
+        <p>Join thousands of patients who trust CareSync for their healthcare needs</p>
+        <div class="cta-btns">
+          <button class="btn btn-primary btn-lg" onclick="show('register')">Create Free Account</button>
+          <button class="btn btn-ghost btn-lg" onclick="show('doctors')">Browse Doctors</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ REGISTER ═══ -->
+<div class="page" id="page-register">
+  <div class="auth-wrap">
+    <div class="auth-card card">
+      <h2>Create Account</h2>
+      <p class="auth-sub">Join thousands managing their health smarter</p>
+
+      <!-- Social signup -->
+      <div class="social-grid">
+        <button class="social-btn google" onclick="socialLogin('Google')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </button>
+        <button class="social-btn facebook" onclick="socialLogin('Facebook')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </button>
+        <button class="social-btn apple" onclick="socialLogin('Apple')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </button>
+        <button class="social-btn github" onclick="socialLogin('GitHub')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </button>
+      </div>
+
+      <div class="social-divider">or register with email</div>
+
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="reg-name" placeholder="Ali Hassan"></div>
+        <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="reg-age" type="number" placeholder="25"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="reg-email" type="email" placeholder="you@email.com"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="reg-phone" placeholder="+92 300 0000000"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="reg-pass" type="password" placeholder="Min 8 characters"></div>
+      <div id="reg-err" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()">Create Account</button>
+      <p class="auth-switch">Already have an account? <button onclick="show('login')">Login</button></p>
+      <div class="alt-logins"><button onclick="show('doctor-login')">Doctor Login →</button><button onclick="show('admin-login')">Admin Login →</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div class="page" id="page-login">
+  <div class="auth-wrap">
+    <div class="auth-card card">
+      <h2>Welcome Back</h2>
+      <p class="auth-sub">Sign in to your CareSync account</p>
+
+      <!-- Social login buttons -->
+      <div class="social-grid">
+        <button class="social-btn google" onclick="socialLogin('Google')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </button>
+        <button class="social-btn facebook" onclick="socialLogin('Facebook')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </button>
+        <button class="social-btn apple" onclick="socialLogin('Apple')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Apple
+        </button>
+        <button class="social-btn github" onclick="socialLogin('GitHub')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </button>
+        <button class="social-btn twitter" onclick="socialLogin('X / Twitter')" style="grid-column:span 1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          X (Twitter)
+        </button>
+        <button class="social-btn linkedin" onclick="socialLogin('LinkedIn')" style="grid-column:span 1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </button>
+      </div>
+
+      <div class="social-divider">or sign in with email</div>
+
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="you@email.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-pass" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div id="login-err" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In</button>
+      <p class="auth-switch">New here? <button onclick="show('register')">Create account</button></p>
+      <div class="alt-logins"><button onclick="show('doctor-login')">Doctor Login</button><span style="color:var(--border)">|</span><button onclick="show('admin-login')">Admin Login</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DOCTOR LOGIN ═══ -->
+<div class="page" id="page-doctor-login">
+  <div class="auth-wrap">
+    <div class="auth-card card">
+      <h2>Doctor Login</h2>
+      <p class="auth-sub">Access your appointment dashboard</p>
+      <div class="demo-box">Demo: <strong>rajesh@medibook.com</strong> / <strong>doctor123</strong></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="dl-email" type="email"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="dl-pass" type="password"></div>
+      <div id="dl-err" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="doDoctorLogin()">Doctor Sign In</button>
+      <p class="auth-switch">New doctor? <button onclick="show('doctor-register')">Apply to Join</button></p>
+      <p class="auth-switch">Patient? <button onclick="show('login')">Patient Login</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DOCTOR REGISTRATION ═══ -->
+<div class="page" id="page-doctor-register">
+  <div class="auth-wrap">
+    <div class="auth-card card" style="max-width:600px">
+      <h2>Doctor Registration</h2>
+      <p class="auth-sub">Join our network of verified healthcare professionals</p>
+      
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name *</label><input class="form-input" id="dr-name" placeholder="Dr. Full Name"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="dr-email" type="email" placeholder="doctor@email.com"></div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Phone *</label><input class="form-input" id="dr-phone" placeholder="+91 98765 43210"></div>
+        <div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="dr-pass" type="password" placeholder="Min 8 characters"></div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Specialization *</label>
+          <select class="form-input" id="dr-spec">
+            <option value="">Select Specialization</option>
+            <option>Cardiologist</option>
+            <option>Neurologist</option>
+            <option>Dermatologist</option>
+            <option>Orthopedic</option>
+            <option>Pediatrician</option>
+            <option>General Physician</option>
+            <option>Gynecologist</option>
+            <option>Dentist</option>
+            <option>ENT Specialist</option>
+            <option>Ophthalmologist</option>
+            <option>Psychiatrist</option>
+            <option>Urologist</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Years of Experience *</label><input class="form-input" id="dr-exp" type="number" placeholder="e.g., 10"></div>
+      </div>
+      
+      <div class="form-group"><label class="form-label">Medical Registration Number *</label><input class="form-input" id="dr-reg" placeholder="e.g., MCI-12345"></div>
+      
+      <div class="form-group"><label class="form-label">Degrees & Qualifications *</label>
+        <div class="degree-tags" id="degree-tags">
+          <label class="degree-tag"><input type="checkbox" value="MBBS"> MBBS</label>
+          <label class="degree-tag"><input type="checkbox" value="MD"> MD</label>
+          <label class="degree-tag"><input type="checkbox" value="MS"> MS</label>
+          <label class="degree-tag"><input type="checkbox" value="DM"> DM</label>
+          <label class="degree-tag"><input type="checkbox" value="MCh"> MCh</label>
+          <label class="degree-tag"><input type="checkbox" value="DNB"> DNB</label>
+          <label class="degree-tag"><input type="checkbox" value="BDS"> BDS</label>
+          <label class="degree-tag"><input type="checkbox" value="MDS"> MDS</label>
+          <label class="degree-tag"><input type="checkbox" value="BAMS"> BAMS</label>
+          <label class="degree-tag"><input type="checkbox" value="BHMS"> BHMS</label>
+        </div>
+      </div>
+      
+      <div class="form-group"><label class="form-label">Consultation Fee (Rs) *</label><input class="form-input" id="dr-fee" type="number" placeholder="e.g., 500"></div>
+      
+      <div class="form-group"><label class="form-label">About / Bio</label><textarea class="form-textarea" id="dr-bio" placeholder="Brief description about your practice and expertise..."></textarea></div>
+      
+      <div class="doc-upload-section">
+        <h4 style="font-size:1rem;margin-bottom:1rem;color:var(--text)">Required Documents *</h4>
+        
+        <div class="upload-row">
+          <div class="upload-item">
+            <label class="form-label">Medical Degree Certificate</label>
+            <div class="file-upload" onclick="document.getElementById('doc-degree').click()">
+              <input type="file" id="doc-degree" accept=".pdf,.jpg,.jpeg,.png" hidden onchange="showFileName(this,'degree-name')">
+              <div class="file-upload-icon">📄</div>
+              <div class="file-upload-text" id="degree-name">Click to upload</div>
+              <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            </div>
+          </div>
+          
+          <div class="upload-item">
+            <label class="form-label">Medical Council Registration</label>
+            <div class="file-upload" onclick="document.getElementById('doc-reg').click()">
+              <input type="file" id="doc-reg" accept=".pdf,.jpg,.jpeg,.png" hidden onchange="showFileName(this,'reg-name')">
+              <div class="file-upload-icon">📋</div>
+              <div class="file-upload-text" id="reg-name">Click to upload</div>
+              <div class="file-upload-hint">PDF, JPG, PNG (Max 5MB)</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="upload-row">
+          <div class="upload-item">
+            <label class="form-label">Government ID Proof</label>
+            <div class="file-upload" onclick="document.getElementById('doc-id').click()">
+              <input type="file" id="doc-id" accept=".pdf,.jpg,.jpeg,.png" hidden onchange="showFileName(this,'id-name')">
+              <div class="file-upload-icon">🪪</div>
+              <div class="file-upload-text" id="id-name">Click to upload</div>
+              <div class="file-upload-hint">Aadhaar / Passport / Driving License</div>
+            </div>
+          </div>
+          
+          <div class="upload-item">
+            <label class="form-label">Profile Photo</label>
+            <div class="file-upload" onclick="document.getElementById('doc-photo').click()">
+              <input type="file" id="doc-photo" accept=".jpg,.jpeg,.png" hidden onchange="showFileName(this,'photo-name')">
+              <div class="file-upload-icon">📷</div>
+              <div class="file-upload-text" id="photo-name">Click to upload</div>
+              <div class="file-upload-hint">JPG, PNG (Max 2MB)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group" style="margin-top:1.5rem">
+        <label class="checkbox-label">
+          <input type="checkbox" id="dr-terms">
+          <span>I confirm that all information provided is accurate and I have valid medical licenses to practice.</span>
+        </label>
+      </div>
+      
+      <div id="dr-err" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="doDoctorRegister()">Submit Application</button>
+      <p class="auth-switch">Already registered? <button onclick="show('doctor-login')">Doctor Login</button></p>
+      <p class="auth-switch">Not a doctor? <button onclick="show('login')">Patient Login</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN LOGIN ═══ -->
+<div class="page" id="page-admin-login">
+  <div class="auth-wrap">
+    <div class="auth-card card">
+      <h2>Admin Login</h2>
+      <p class="auth-sub">System administration panel</p>
+      <div class="demo-box">Username: <strong>admin</strong> / Password: <strong>admin123</strong></div>
+      <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="al-user" value="admin"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="al-pass" type="password" value="admin123"></div>
+      <div id="al-err" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="doAdminLogin()">Admin Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DOCTORS LIST ═══ -->
+<div class="page" id="page-doctors">
+  <div class="pw">
+    <div class="ph"><h2>Find a Doctor</h2><p>Browse our verified specialists and book instantly</p></div>
+    <div class="search-row">
+      <input placeholder="🔍  Search by name or specialization…" id="s-query" oninput="filterDocs()">
+      <select id="s-spec" onchange="filterDocs()">
+        <option value="">All Specializations</option>
+        <option>Cardiologist</option><option>Neurologist</option>
+        <option>Dermatologist</option><option>Orthopedic</option>
+        <option>Pediatrician</option><option>General Physician</option>
+      </select>
+    </div>
+    <div class="result-count" id="doc-count"></div>
+    <div class="grid-auto" id="docs-grid"></div>
+  </div>
+</div>
+
+<!-- ═══ BOOK APPOINTMENT ═══ -->
+<div class="page" id="page-book">
+  <div class="pw-narrow">
+    <button class="back-link" onclick="show('doctors')">← Back to Doctors</button>
+    <div class="card" style="margin-bottom:1.2rem">
+      <div class="doctor-banner" id="book-doc-info"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:1.15rem;margin-bottom:1.2rem">Select Date & Time</h3>
+      <div class="form-group"><label class="form-label">Preferred Date</label><input type="date" class="form-input" id="book-date"></div>
+      <div class="form-group">
+        <label class="form-label">Available Slots</label>
+        <div class="slot-grid" id="book-slots"></div>
+      </div>
+      <div id="book-prob" class="hidden" style="margin-top:1rem"></div>
+      <div id="book-err" class="form-error hidden" style="margin-top:1rem"></div>
+      <button class="btn btn-primary btn-full" style="margin-top:1.2rem" onclick="confirmBook()">Confirm & Pay →</button>
+    </div>
+
+    <div class="card" style="margin-top:1.2rem" id="review-section">
+      <h3 style="font-size:1.1rem;margin-bottom:1rem">Leave a Review</h3>
+      <div id="review-form">
+        <div class="form-group">
+          <label class="form-label">Rating</label>
+          <div style="display:flex;gap:6px" id="star-btns">
+            <button onclick="setStars(1)" style="font-size:1.5rem;background:none;border:none;cursor:pointer;opacity:.35">⭐</button>
+            <button onclick="setStars(2)" style="font-size:1.5rem;background:none;border:none;cursor:pointer;opacity:.35">⭐</button>
+            <button onclick="setStars(3)" style="font-size:1.5rem;background:none;border:none;cursor:pointer;opacity:.35">⭐</button>
+            <button onclick="setStars(4)" style="font-size:1.5rem;background:none;border:none;cursor:pointer;opacity:.35">⭐</button>
+            <button onclick="setStars(5)" style="font-size:1.5rem;background:none;border:none;cursor:pointer;opacity:.35">⭐</button>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Comment (optional)</label><textarea class="form-textarea" id="review-text" placeholder="Share your experience…"></textarea></div>
+        <button class="btn btn-outline btn-sm" onclick="submitReview()">Submit Review</button>
+      </div>
+      <div id="reviews-list" style="margin-top:1.2rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAYMENT ═══ -->
+<div class="page" id="page-payment">
+  <div class="pay-page">
+    <div class="pay-wrap">
+      <div class="pay-header">
+        <button class="back-link" style="margin-bottom:0" onclick="show('doctors')">←</button>
+        <div><h2 class="pay-title">Secure Payment</h2><p class="pay-sub">Appointment confirmation</p></div>
+        <div class="pay-ssl">🔒 SSL</div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="card order-card">
+        <div class="order-row">
+          <div class="order-avatar" id="pay-avatar">👩‍⚕️</div>
+          <div style="flex:1">
+            <div class="order-doc" id="pay-doc-name">Dr. Atul Singh</div>
+            <div class="order-spec" id="pay-doc-spec">Cardiologist</div>
+            <div class="order-time" id="pay-datetime">📅 — | 🕐 —</div>
+          </div>
+          <div class="order-fee">
+            <div class="fee-amount" id="pay-fee-amt">Rs. 2,500</div>
+            <div class="fee-sub">Consultation fee</div>
+          </div>
+        </div>
+        <div class="order-total">
+          <span>Total Due</span>
+          <span class="total-amount" id="pay-total">Rs.2,500</span>
+        </div>
+      </div>
+
+      <!-- Payment steps -->
+      <div class="card" id="pay-step-method">
+        <div class="section-heading">Choose Payment Method</div>
+        <div class="methods">
+          <button class="method-btn sel" onclick="selMethod('card',this)">
+            <div class="method-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="3" stroke="#1a4a3a"/><line x1="2" y1="10" x2="22" y2="10" stroke="#1a4a3a"/><line x1="6" y1="15" x2="10" y2="15" stroke="#1a4a3a"/></svg></div>
+            <div><div class="method-name">Credit / Debit Card</div><div class="method-desc">Visa, Mastercard, UnionPay</div></div>
+            <div class="method-radio"><div class="method-radio-dot"></div></div>
+          </button>
+          <button class="method-btn" onclick="selMethod('gpay',this)">
+            <div class="method-icon" style="background:linear-gradient(135deg,#4285f4 0%,#34a853 50%,#fbbc04 75%,#ea4335 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:#fff;font-size:10px;font-weight:bold">GPay</div>
+            <div><div class="method-name">Google Pay</div><div class="method-desc">UPI payment via Google Pay</div></div>
+            <div class="method-radio"></div>
+          </button>
+          <button class="method-btn" onclick="selMethod('phonepe',this)">
+            <div class="method-icon" style="background:linear-gradient(135deg,#5f259f 0%,#7c3dd8 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:#fff;font-size:9px;font-weight:bold">PhonePe</div>
+            <div><div class="method-name">PhonePe</div><div class="method-desc">UPI payment via PhonePe</div></div>
+            <div class="method-radio"></div>
+          </button>
+          <button class="method-btn" onclick="selMethod('paytm',this)">
+            <div class="method-icon" style="background:linear-gradient(135deg,#002e6e 0%,#00baf2 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:#fff;font-size:10px;font-weight:bold">Paytm</div>
+            <div><div class="method-name">Paytm</div><div class="method-desc">UPI payment via Paytm</div></div>
+            <div class="method-radio"></div>
+          </button>
+          <button class="method-btn" onclick="selMethod('upi',this)">
+            <div class="method-icon" style="background:#1a4a3a;border-radius:8px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:#fff;font-size:10px;font-weight:bold">UPI</div>
+            <div><div class="method-name">Other UPI</div><div class="method-desc">Any UPI app (BHIM, Amazon Pay, etc)</div></div>
+            <div class="method-radio"></div>
+          </button>
+          <button class="method-btn" onclick="selMethod('bank',this)">
+            <div class="method-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M4 18h16M6 18v-8l6-6 6 6v8" stroke="#1a4a3a"/><path d="M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="#1a4a3a"/></svg></div>
+            <div><div class="method-name">Bank Transfer / NEFT</div><div class="method-desc">Direct bank payment</div></div>
+            <div class="method-radio"></div>
+          </button>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="goToPayDetails()">Continue to Payment →</button>
+      </div>
+
+      <!-- Card details -->
+      <div class="card hidden" id="pay-step-card">
+        <div class="section-heading">Card Details</div>
+        <div class="card-visual">
+          <div class="cv-chip">▬▬</div>
+          <div class="cv-number" id="cv-num">•••• •••• •••• ••••</div>
+          <div class="cv-bottom">
+            <span id="cv-name">CARDHOLDER NAME</span>
+            <span id="cv-exp">MM/YY</span>
+          </div>
+          <div class="cv-logo">VISA</div>
+        </div>
+        <div class="form-group"><label class="form-label">Cardholder Name</label><input class="form-input" id="cn-name" placeholder="As on card" oninput="updateCard()"></div>
+        <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" id="cn-num" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this);updateCard()"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Expiry</label><input class="form-input" id="cn-exp" placeholder="MM/YY" maxlength="5" oninput="fmtExp(this);updateCard()"></div>
+          <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="cn-cvv" placeholder="•••" type="password" maxlength="4"></div>
+        </div>
+        <div id="card-err" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-full" id="pay-card-btn" onclick="processPayment()">🔒 Pay Now</button>
+      </div>
+
+      <!-- Mobile wallet / UPI details -->
+      <div class="card hidden" id="pay-step-wallet">
+        <div class="section-heading" id="wallet-title">UPI Payment</div>
+        <div style="background:var(--green-lt);border:1px solid rgba(26,74,58,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;font-size:.83rem;color:var(--green)" id="wallet-hint">
+          Enter your UPI ID (e.g., yourname@upi, yourname@okaxis, yourname@ybl)
+        </div>
+        <div class="form-group"><label class="form-label">UPI ID</label><input class="form-input" id="wallet-num" placeholder="yourname@upi" maxlength="50"></div>
+        <div id="wallet-err" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-full" onclick="processPayment()">Verify & Pay</button>
+      </div>
+
+      <!-- UPI specific step -->
+      <div class="card hidden" id="pay-step-upi">
+        <div class="section-heading">UPI Payment</div>
+        <div style="background:var(--green-lt);border:1px solid rgba(26,74,58,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;font-size:.83rem;color:var(--green)">
+          Enter your UPI ID to complete the payment. You will receive a notification on your UPI app.
+        </div>
+        <div class="form-group"><label class="form-label">UPI ID</label><input class="form-input" id="upi-id" placeholder="yourname@upi / yourname@okaxis / yourname@ybl" maxlength="50"></div>
+        <div id="upi-err" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-full" onclick="processPayment()">Pay via UPI</button>
+      </div>
+
+      <!-- Bank transfer details -->
+      <div class="card hidden" id="pay-step-bank">
+        <div class="section-heading">Bank Transfer / IBFT</div>
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem;font-size:.83rem">
+          <div style="font-weight:700;margin-bottom:.5rem">Transfer To:</div>
+          <div style="color:var(--muted)">Bank: <strong style="color:var(--text)">HBL / Meezan / MCB</strong></div>
+          <div style="color:var(--muted)">Account: <strong style="color:var(--text)">0123-4567-8901</strong></div>
+          <div style="color:var(--muted)">IBAN: <strong style="color:var(--text)">PK36HABB0000000000010001</strong></div>
+          <div style="color:var(--muted)">Amount: <strong style="color:var(--green)" id="bank-amt">Rs. 2,500</strong></div>
+        </div>
+        <div class="form-group"><label class="form-label">Your Transaction / Account Number</label><input class="form-input" id="bank-ref" placeholder="Enter transaction reference or account number"></div>
+        <div id="bank-err" class="form-error hidden"></div>
+        <button class="btn btn-primary btn-full" onclick="processPayment()">✅ Confirm Transfer</button>
+      </div>
+
+      <!-- Processing -->
+      <div class="card hidden" id="pay-step-processing">
+        <div class="processing">
+          <div class="spinner" style="margin:0 auto"></div>
+          <h3>Processing Payment…</h3>
+          <p>Please wait. Do not close this window.</p>
+          <div class="pay-dots">
+            <div class="pay-dot"></div><div class="pay-dot"></div><div class="pay-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="card hidden" id="pay-step-success">
+        <div class="pay-success">
+          <span class="pay-success-icon">✅</span>
+          <h3>Payment Successful!</h3>
+          <p style="color:var(--muted);margin-bottom:1rem" id="pay-success-msg">Your appointment is confirmed.</p>
+          <div class="receipt-rows" id="pay-receipt"></div>
+          <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem">
+            <button class="btn btn-primary" onclick="show('appointments')">View Appointments</button>
+            <button class="btn btn-outline" onclick="window.print()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Print Receipt</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="security-note" id="pay-security">🔒 256-bit SSL · Stripe-powered · Your card is never stored</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MY APPOINTMENTS ═══ -->
+<div class="page" id="page-appointments">
+  <div class="pw">
+    <div class="ph"><h2>My Appointments</h2><p>Track and manage all your bookings</p></div>
+    <div id="appt-body"></div>
+  </div>
+</div>
+
+<!-- ═══ PROFILE ═══ -->
+<div class="page" id="page-profile">
+  <div class="pw-narrow">
+    <div class="ph"><h2>My Profile</h2><p>Update your personal details</p></div>
+    <div class="card">
+      <div class="profile-hero">
+        <div class="profile-ava">👤</div>
+        <div>
+          <div class="profile-name" id="prof-disp-name"></div>
+          <div class="profile-email" id="prof-disp-email"></div>
+          <div style="margin-top:6px"><span class="badge badge-info">Patient</span></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="prof-name"></div>
+        <div class="form-group"><label class="form-label">Age</label><input class="form-input" type="number" id="prof-age"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="prof-phone"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="prof-email" disabled style="opacity:.55"></div>
+      <div class="divider"></div>
+      <div style="font-size:.8rem;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:.8rem">CHANGE PASSWORD</div>
+      <div class="form-group"><label class="form-label">New Password <span style="font-weight:400">(leave blank to keep current)</span></label><input class="form-input" type="password" id="prof-pass" placeholder="Min 8 characters"></div>
+      <div id="prof-err" class="form-error hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DOCTOR PANEL ═══ -->
+<div class="page" id="page-doctor-panel">
+  <div class="pw">
+    <div class="ph"><h2 id="dp-title">Doctor Panel</h2><p id="dp-sub">Manage your appointment requests</p></div>
+    <div class="grid-3" style="margin-bottom:2rem" id="dp-stats"></div>
+    <div class="panel-tabs" id="dp-tabs">
+      <button class="panel-tab active" onclick="filterPanel('pending',this)">🕐 Pending</button>
+      <button class="panel-tab" onclick="filterPanel('approved',this)">✅ Approved</button>
+      <button class="panel-tab" onclick="filterPanel('cancelled',this)">❌ Rejected</button>
+      <button class="panel-tab" onclick="filterPanel('all',this)">All</button>
+    </div>
+    <div id="dp-list"></div>
+  </div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div class="page" id="page-admin">
+  <div class="pw">
+    <div class="ph"><h2>Admin Dashboard</h2><p>Full system control panel</p></div>
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="adminTab('overview',this)">📊 Overview</button>
+      <button class="panel-tab" onclick="adminTab('appointments',this)">📅 Appointments</button>
+      <button class="panel-tab" onclick="adminTab('patients',this)">👥 Patients</button>
+      <button class="panel-tab" onclick="adminTab('doctors',this)">👨‍⚕️ Doctors</button>
+      <button class="panel-tab" onclick="adminTab('payments',this)">💳 Payments</button>
+    </div>
+    <div id="admin-body"></div>
+  </div>
+</div>
+
+</main><!-- end main -->
+
+<!-- ─── BOTTOM NAV ─── -->
+<div class="bottom-nav" id="bottomNav">
+  <div class="bn-items" id="bnItems"></div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer style="background:var(--green);color:rgba(255,255,255,.6);padding:1.4rem 1.5rem;display:flex;justify-content:space-between;align-items:center;font-size:.78rem;flex-wrap:wrap;gap:.8rem">
+  <span>© 2025 CareSync — Online Doctor Appointment System</span>
+  <div style="display:flex;gap:1.5rem">
+    <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Privacy Policy</span>
+    <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Terms of Use</span>
+    <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Support</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
